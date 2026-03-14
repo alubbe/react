@@ -38,6 +38,7 @@ const pendingOperations: Map<number, AsyncSequence> =
   __DEV__ && enableAsyncDebugInfo ? new Map() : (null: any);
 
 // Keep the last resolved await as a workaround for async functions missing data.
+// It is only meaningful while a request is still active.
 let lastRanAwait: null | AwaitNode = null;
 
 function resolvePromiseOrAwaitNode(
@@ -53,6 +54,12 @@ function resolvePromiseOrAwaitNode(
 }
 
 const emptyStack: ReactStackTrace = [];
+
+export function clearLastRanAwait(): void {
+  if (__DEV__ && enableAsyncDebugInfo) {
+    lastRanAwait = null;
+  }
+}
 
 // Initialize the tracing of async operations.
 // We do this globally since the async work can potentially eagerly

@@ -20,3 +20,4 @@ export function getAsyncSequenceFromPromise(
 ): null | AsyncSequence {
   return null;
 }
+export function clearLastRanAwait(): void {}

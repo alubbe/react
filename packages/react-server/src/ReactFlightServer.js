@@ -92,6 +92,7 @@ import {
   markAsyncSequenceRootTask,
   getCurrentAsyncSequence,
   getAsyncSequenceFromPromise,
+  clearLastRanAwait,
   parseStackTrace,
   parseStackTracePrivate,
   supportsComponentStorage,
@@ -4140,6 +4141,9 @@ function fatalError(request: Request, error: mixed): void {
     },
   );
   request.cacheController.abort(abortReason);
+  if (__DEV__ && request.status === CLOSED) {
+    clearLastRanAwait();
+  }
 }
 
 function serializeErrorValue(request: Request, error: Error): string {
@@ -6105,6 +6109,9 @@ function flushCompletedChunks(request: Request): void {
             close(request.destination);
             request.destination = null;
           }
+          if (__DEV__) {
+            clearLastRanAwait();
+          }
           return;
         }
       }
@@ -6127,6 +6134,9 @@ function flushCompletedChunks(request: Request): void {
     if (__DEV__ && request.debugDestination !== null) {
       close(request.debugDestination);
       request.debugDestination = null;
+    }
+    if (__DEV__) {
+      clearLastRanAwait();
     }
   }
 }
@@ -6178,6 +6188,9 @@ export function startFlowing(request: Request, destination: Destination): void {
   if (request.status === CLOSING) {
     request.status = CLOSED;
     closeWithError(destination, request.fatalError);
+    if (__DEV__) {
+      clearLastRanAwait();
+    }
     return;
   }
   if (request.status === CLOSED) {
@@ -6203,6 +6216,9 @@ export function startFlowingDebug(
   if (request.status === CLOSING) {
     request.status = CLOSED;
     closeWithError(debugDestination, request.fatalError);
+    if (__DEV__) {
+      clearLastRanAwait();
+    }
     return;
   }
   if (request.status === CLOSED) {
